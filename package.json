@@ -1,0 +1,22 @@
+{
+  "name": "ondc-logistics-bap",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "server": "cd apps/server && node index.js",
+    "mock": "cd apps/mock-network && node index.js",
+    "mobile": "cd apps/mobile && npx expo start",
+    "dev": "concurrently \"npm run mock\" \"npm run server\"",
+    "install:all": "npm install && cd apps/mobile && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "react-dom": "18.3.1",
+    "react-native-web": "~0.19.13"
+  }
+}

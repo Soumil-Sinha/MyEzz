@@ -1,0 +1,41 @@
+{
+    "expo": {
+        "name": "ONDC Logistics",
+        "slug": "ondc-logistics-bap",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/icon.png",
+        "userInterfaceStyle": "light",
+        "scheme": "ondc-logistics",
+        "splash": {
+            "image": "./assets/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#FFF7ED"
+        },
+        "assetBundlePatterns": [
+            "**/*"
+        ],
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.ondc.logistics.bap"
+        },
+        "android": {
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/adaptive-icon.png",
+                "backgroundColor": "#FFF7ED"
+            },
+            "package": "com.ondc.logistics.bap"
+        },
+        "web": {
+            "favicon": "./assets/favicon.png",
+            "bundler": "metro"
+        },
+        "plugins": [
+            "expo-router",
+            "expo-font"
+        ],
+        "experiments": {
+            "typedRoutes": false
+        }
+    }
+}

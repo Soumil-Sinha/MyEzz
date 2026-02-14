@@ -6,14 +6,27 @@
  * Beckn protocol flows for logistics search, select, init, etc.
  */
 
-require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 
-const apiRoutes = require('./routes/api');
-const becknRoutes = require('./routes/beckn');
+// Client API Routes
+const searchRoutes = require('./routes/search');
+const selectRoutes = require('./routes/select');
+const initRoutes = require('./routes/init');
+const confirmRoutes = require('./routes/confirm');
+const statusRoutes = require('./routes/status');
+const cancelRoutes = require('./routes/cancel');
+
+// Beckn Callback Routes
+const onSearchRoutes = require('./routes/on_search');
+const onSelectRoutes = require('./routes/on_select');
+const onInitRoutes = require('./routes/on_init');
+const onConfirmRoutes = require('./routes/on_confirm');
+const onStatusRoutes = require('./routes/on_status');
+const onCancelRoutes = require('./routes/on_cancel');
 const store = require('./store');
 
 const app = express();
@@ -36,10 +49,20 @@ app.get('/health', (req, res) => {
 });
 
 // REST API routes (for mobile app)
-app.use('/api', apiRoutes);
+app.use('/api', searchRoutes);
+app.use('/api', selectRoutes);
+app.use('/api', initRoutes);
+app.use('/api', confirmRoutes);
+app.use('/api', statusRoutes);
+app.use('/api', cancelRoutes);
 
 // Beckn protocol callback routes (for ONDC network / mock network)
-app.use('/beckn', becknRoutes);
+app.use('/beckn', onSearchRoutes);
+app.use('/beckn', onSelectRoutes);
+app.use('/beckn', onInitRoutes);
+app.use('/beckn', onConfirmRoutes);
+app.use('/beckn', onStatusRoutes);
+app.use('/beckn', onCancelRoutes);
 
 // Error handler
 app.use((err, req, res, _next) => {

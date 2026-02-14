@@ -102,6 +102,46 @@ function addInitData(transactionId, initData) {
 }
 
 /**
+ * Update transaction with on_confirm data
+ * @param {string} transactionId 
+ * @param {object} confirmData 
+ */
+function addConfirmData(transactionId, confirmData) {
+    const txn = store.transactions[transactionId];
+    if (!txn) return null;
+
+    txn.status = 'confirmed';
+    txn.initResults.push(confirmData); // Storing within initResults or create new confirmResults? 
+    // Let's create a new field for clarity or just update status/updatedAt is enough if we don't store the full body separately?
+    // Pattern suggests storing it. initResults was used for init. 
+    // Let's assume on_confirm returns similar to init? 
+    // Actually, let's add `confirmResults` to the structure in createTransaction if we want consistency, 
+    // but the JS object is dynamic so we can just add it.
+    if (!txn.confirmResults) txn.confirmResults = [];
+    txn.confirmResults.push(confirmData);
+
+    txn.updatedAt = new Date().toISOString();
+    return txn;
+}
+
+/**
+ * Update transaction with on_cancel data
+ * @param {string} transactionId 
+ * @param {object} cancelData 
+ */
+function addCancelData(transactionId, cancelData) {
+    const txn = store.transactions[transactionId];
+    if (!txn) return null;
+
+    txn.status = 'cancelled';
+    if (!txn.cancelResults) txn.cancelResults = [];
+    txn.cancelResults.push(cancelData);
+
+    txn.updatedAt = new Date().toISOString();
+    return txn;
+}
+
+/**
  * Update transaction with on_status data
  * @param {string} transactionId 
  * @param {object} statusData 
@@ -152,6 +192,8 @@ module.exports = {
     addCatalogData,
     addSelectData,
     addInitData,
+    addConfirmData,
+    addCancelData,
     addStatusData,
     addErrorData,
     getAllTransactionIds,

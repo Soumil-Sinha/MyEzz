@@ -13,8 +13,8 @@ const {
     generateMessageId,
     generateTransactionId,
     getTimestamp,
-} = require('../../../packages/shared/helpers');
-const { createAuthorizationHeader } = require('../crypto');
+} = require('../../packages/shared/helpers');
+const { createAuthorizationHeader } = require('../crypto/sign');
 
 /**
  * Get the target gateway URL based on mode
@@ -327,10 +327,6 @@ async function init({ transactionId, providerId, itemId, fulfillmentId, bppId, b
                                     area_code: '110001',
                                 },
                             },
-                            contact: {
-                                phone: '9876543210',
-                                email: 'sender@example.com',
-                            },
                         },
                         end: {
                             location: {
@@ -344,10 +340,6 @@ async function init({ transactionId, providerId, itemId, fulfillmentId, bppId, b
                                     country: 'IND',
                                     area_code: '201301',
                                 },
-                            },
-                            contact: {
-                                phone: '9876543211',
-                                email: 'receiver@example.com',
                             },
                         },
                     },
@@ -373,10 +365,101 @@ async function init({ transactionId, providerId, itemId, fulfillmentId, bppId, b
     return { transactionId, messageId: msgId, response };
 }
 
+/**
+ * Build and send a /confirm request
+ */
+async function confirm({ transactionId, providerId, itemId, fulfillmentId, bppId, bppUri, billing, payment }) {
+    const msgId = generateMessageId();
+    const context = buildContext({
+        action: 'confirm',
+        transactionId,
+        messageId: msgId,
+        bapId: process.env.SUBSCRIBER_ID || 'ondc-logistics-bap.example.com',
+        bapUri: process.env.BAP_BASE_URL || 'http://localhost:3000',
+        bppId,
+        bppUri,
+    });
+
+    // Minimal valid confirm payload
+    const payload = {
+        context,
+        message: {
+            order: {
+                provider: { id: providerId },
+                items: [{ id: itemId, fulfillment_id: fulfillmentId }],
+                billing,
+                payment: payment || {
+                    type: 'POST-FULFILLMENT',
+                    collected_by: 'BAP',
+                }
+            }
+        }
+    };
+
+    const response = await sendBecknRequest('confirm', payload);
+    return { transactionId, messageId: msgId, response };
+}
+
+/**
+ * Build and send a /status request
+ */
+async function status({ transactionId, bppId, bppUri }) {
+    const msgId = generateMessageId();
+    const context = buildContext({
+        action: 'status',
+        transactionId,
+        messageId: msgId,
+        bapId: process.env.SUBSCRIBER_ID || 'ondc-logistics-bap.example.com',
+        bapUri: process.env.BAP_BASE_URL || 'http://localhost:3000',
+        bppId,
+        bppUri,
+    });
+
+    const payload = {
+        context,
+        message: {
+            order_id: transactionId
+        }
+    };
+
+    const response = await sendBecknRequest('status', payload);
+    return { transactionId, messageId: msgId, response };
+}
+
+/**
+ * Build and send a /cancel request
+ */
+async function cancel({ transactionId, cancellationReasonId, bppId, bppUri }) {
+    const msgId = generateMessageId();
+    const context = buildContext({
+        action: 'cancel',
+        transactionId,
+        messageId: msgId,
+        bapId: process.env.SUBSCRIBER_ID || 'ondc-logistics-bap.example.com',
+        bapUri: process.env.BAP_BASE_URL || 'http://localhost:3000',
+        bppId,
+        bppUri,
+    });
+
+    const payload = {
+        context,
+        message: {
+            order_id: transactionId,
+            cancellation_reason_id: cancellationReasonId
+        }
+    };
+
+    const response = await sendBecknRequest('cancel', payload);
+    return { transactionId, messageId: msgId, response };
+}
+
 module.exports = {
     search,
     select,
     init,
+    confirm,
+    status,
+    cancel,
     sendBecknRequest,
     getGatewayUrl,
 };

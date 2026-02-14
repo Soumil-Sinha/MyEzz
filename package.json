@@ -3,20 +3,27 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "apps/*"
+    "apps/*",
+    "bap-server"
   ],
   "scripts": {
-    "server": "cd apps/server && node index.js",
+    "server": "cd bap-server && node app.js",
     "mock": "cd apps/mock-network && node index.js",
     "mobile": "cd apps/mobile && npx expo start",
     "dev": "concurrently \"npm run mock\" \"npm run server\"",
-    "install:all": "npm install && cd apps/mobile && npm install"
+    "install:all": "npm install && cd apps/mobile && npm install",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
   },
   "dependencies": {
     "react-dom": "18.3.1",
-    "react-native-web": "~0.19.13"
-  }
+    "react-native-web": "~0.19.13",
+    "expo": "~52.0.49",
+    "react": "18.3.1",
+    "react-native": "0.76.9"
+  },
+  "version": "1.0.0"
 }

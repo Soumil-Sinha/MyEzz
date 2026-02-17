@@ -33,7 +33,11 @@ const onCancelRoutes = require('./routes/on_cancel');
 const store = require('./store');
 
 const app = express();
-const PORT = process.env.PORT || process.env.BAP_PORT || 3000;
+// Debug logs for Railway
+console.log("ENV PORT =", process.env.PORT);
+console.log("ENV BAP_PORT =", process.env.BAP_PORT);
+
+const PORT = Number(process.env.PORT) || Number(process.env.BAP_PORT) || 3000;
 
 // Middleware
 app.use(cors());
@@ -95,10 +99,10 @@ app.use((err, req, res, _next) => {
 app.listen(PORT, '0.0.0.0', () => {
     const mode = process.env.DEV_MODE === 'true' ? 'DEV (mock network)' : 'PRODUCTION (ONDC network)';
     console.log('');
-    console.log('╔══════════════════════════════════════════════╗');
-    console.log('║     ONDC Logistics BAP Server                ║');
-    console.log('╠══════════════════════════════════════════════╣');
-    console.log(`║  Port:     ${PORT}                              ║`);
+    console.log('=================================');
+    console.log('BAP SERVER STARTED');
+    console.log('PORT:', PORT);
+    console.log('=================================');
     console.log(`║  Mode:     ${mode.padEnd(33)}║`);
     console.log(`║  Domain:   ONDC:LOG10                         ║`);
     console.log(`║  Version:  1.2.0                              ║`);

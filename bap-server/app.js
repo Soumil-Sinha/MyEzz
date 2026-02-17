@@ -33,11 +33,21 @@ const onCancelRoutes = require('./routes/on_cancel');
 const store = require('./store');
 
 const app = express();
-// Debug logs for Railway
-console.log("ENV PORT =", process.env.PORT);
-console.log("ENV BAP_PORT =", process.env.BAP_PORT);
 
 const PORT = Number(process.env.PORT) || Number(process.env.BAP_PORT) || 3000;
+
+// Dynamic BAP_BASE_URL calculation (Crucial for Railway)
+const BASE_URL = process.env.BAP_BASE_URL ||
+    (process.env.RAILWAY_STATIC_URL ? `https://${process.env.RAILWAY_STATIC_URL}` :
+        (process.env.RAILWAY_PUBLIC_DOMAIN ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}` :
+            `http://localhost:${PORT}`));
+
+process.env.BAP_BASE_URL = BASE_URL;
+
+// Debug logs for Railway
+console.log("ENV PORT =", process.env.PORT);
+console.log("Calculated PORT =", PORT);
+console.log("BAP_BASE_URL =", process.env.BAP_BASE_URL);
 
 // Middleware
 app.use(cors());

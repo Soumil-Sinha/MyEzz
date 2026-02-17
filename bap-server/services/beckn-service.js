@@ -13,7 +13,7 @@ const {
     generateMessageId,
     generateTransactionId,
     getTimestamp,
-} = require('../../packages/shared/helpers');
+} = require('../helpers');
 const { createAuthorizationHeader } = require('../crypto/sign');
 
 /**

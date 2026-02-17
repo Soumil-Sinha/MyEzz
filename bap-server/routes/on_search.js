@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const store = require('../store');
 const { verifyAuthorizationHeader } = require('../crypto/verify');
-const { buildAckResponse, buildNackResponse, validateContext } = require('../../packages/shared/helpers');
+const { buildAckResponse, buildNackResponse, validateContext } = require('../helpers');
 
 /**
  * Middleware: Verify Authorization header on incoming callbacks

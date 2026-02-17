@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const store = require('../store');
 const becknService = require('../services/beckn-service');
-const { getTimestamp } = require('../../packages/shared/helpers');
+const { getTimestamp } = require('../helpers');
 
 /**
  * POST /api/init

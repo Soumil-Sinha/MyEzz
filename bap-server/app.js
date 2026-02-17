@@ -6,7 +6,10 @@
  * Beckn protocol flows for logistics search, select, init, etc.
  */
 
-require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
+const path = require('path');
+// Try local .env first (for Railway/standalone), then parent .env (for monorepo dev)
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 
 const express = require('express');
 const cors = require('cors');
@@ -55,6 +58,12 @@ app.use('/api', initRoutes);
 app.use('/api', confirmRoutes);
 app.use('/api', statusRoutes);
 app.use('/api', cancelRoutes);
+
+// Serve static files (for ONDC site verification)
+app.use(express.static('public'));
+
+// ONDC Registration route — must be at root level (Registry calls {subscriber_url}/on_subscribe)
+app.use(require('./routes/on_subscribe'));
 
 // Beckn protocol callback routes (for ONDC network / mock network)
 app.use('/beckn', onSearchRoutes);

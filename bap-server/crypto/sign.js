@@ -6,7 +6,7 @@
 
 const nacl = require('tweetnacl');
 const naclUtil = require('tweetnacl-util');
-const crypto = require('crypto');
+const blake = require('blakejs');
 
 /**
  * Generate a new ed25519 key pair
@@ -26,7 +26,7 @@ function generateKeyPair() {
  * @returns {string} Base64-encoded BLAKE-512 digest
  */
 function createDigest(body) {
-    const hash = crypto.createHash('sha256').update(body).digest();
+    const hash = blake.blake2b(body, null, 64); // 64 bytes = 512 bits
     return `BLAKE-512=${naclUtil.encodeBase64(hash)}`;
 }
 

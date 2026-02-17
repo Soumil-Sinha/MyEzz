@@ -5,24 +5,25 @@
  * Usage: node scripts/generate-keys.js
  */
 
-const nacl = require('tweetnacl');
-const naclUtil = require('tweetnacl-util');
+const crypto = require('../crypto');
 
-const keyPair = nacl.sign.keyPair();
-const publicKey = naclUtil.encodeBase64(keyPair.publicKey);
-const privateKey = naclUtil.encodeBase64(keyPair.secretKey);
+const signingKeys = crypto.generateKeyPair();
+const encryptionKeys = crypto.generateEncryptionKeyPair();
 
 console.log('');
 console.log('═══════════════════════════════════════════════');
-console.log('  ONDC BAP - Ed25519 Key Pair Generator');
+console.log('  ONDC BAP - Key Pair Generator');
 console.log('═══════════════════════════════════════════════');
 console.log('');
 console.log('Add these to your .env file:');
 console.log('');
-console.log(`PUBLIC_KEY=${publicKey}`);
-console.log(`PRIVATE_KEY=${privateKey}`);
+console.log(`# Signing Keys (Ed25519)`);
+console.log(`PUBLIC_KEY=${signingKeys.publicKey}`);
+console.log(`PRIVATE_KEY=${signingKeys.privateKey}`);
 console.log('');
-console.log('Public key (for ONDC registry):');
-console.log(publicKey);
+console.log(`# Encryption Keys (X25519)`);
+console.log(`ENCRYPTION_PUBLIC_KEY=${encryptionKeys.publicKey}`);
+console.log(`ENCRYPTION_PRIVATE_KEY=${encryptionKeys.privateKey}`);
 console.log('');
 console.log('═══════════════════════════════════════════════');
+

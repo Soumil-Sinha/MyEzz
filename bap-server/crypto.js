@@ -16,13 +16,26 @@
 const nacl = require('tweetnacl');
 const naclUtil = require('tweetnacl-util');
 const crypto = require('crypto');
+const blake = require('blakejs');
 
 /**
- * Generate a new ed25519 key pair
+ * Generate a new ed25519 key pair (for signing)
  * @returns {{ publicKey: string, privateKey: string }} Base64-encoded keys
  */
 function generateKeyPair() {
     const keyPair = nacl.sign.keyPair();
+    return {
+        publicKey: naclUtil.encodeBase64(keyPair.publicKey),
+        privateKey: naclUtil.encodeBase64(keyPair.secretKey),
+    };
+}
+
+/**
+ * Generate a new X25519 key pair (for encryption)
+ * @returns {{ publicKey: string, privateKey: string }} Base64-encoded keys
+ */
+function generateEncryptionKeyPair() {
+    const keyPair = nacl.box.keyPair();
     return {
         publicKey: naclUtil.encodeBase64(keyPair.publicKey),
         privateKey: naclUtil.encodeBase64(keyPair.secretKey),
@@ -35,7 +48,7 @@ function generateKeyPair() {
  * @returns {string} Base64-encoded BLAKE-512 digest
  */
 function createDigest(body) {
-    const hash = crypto.createHash('sha256').update(body).digest();
+    const hash = blake.blake2b(body, null, 64); // 64 bytes = 512 bits
     return `BLAKE-512=${naclUtil.encodeBase64(hash)}`;
 }
 
@@ -79,6 +92,35 @@ function verify(message, signatureBase64, publicKeyBase64) {
     } catch (err) {
         console.error('[CRYPTO] Verification error:', err.message);
         return false;
+    }
+}
+
+/**
+ * Decrypt ONDC challenge string
+ * @param {string} encryptedChallenge - Base64 encoded encrypted string
+ * @param {string} ondcPublicKey - Base64 encoded ONDC Registry public key
+ * @param {string} myPrivateKey - Base64 encoded My Encryption Private Key
+ * @returns {string} Decrypted challenge string
+ */
+function decryptChallenge(encryptedChallenge, ondcPublicKey, myPrivateKey) {
+    try {
+        const remotePublicKeyBytes = naclUtil.decodeBase64(ondcPublicKey);
+        const myPrivateKeyBytes = naclUtil.decodeBase64(myPrivateKey);
+
+        // Compute shared secret using Curve25519 (X25519)
+        // nacl.box.before returns the shared secret (precomputed key)
+        const sharedSecret = nacl.box.before(remotePublicKeyBytes, myPrivateKeyBytes);
+
+        // Decrypt using AES-256-ECB (standard for ONDC challenge)
+        // Note: sharedSecret is 32 bytes (256 bits), perfect for AES-256
+        const decipher = crypto.createDecipheriv('aes-256-ecb', Buffer.from(sharedSecret), null);
+        let decrypted = decipher.update(encryptedChallenge, 'base64', 'utf8');
+        decrypted += decipher.final('utf8');
+        return decrypted;
+    } catch (error) {
+        console.error('[CRYPTO] Decryption failed:', error.message);
+        // Fallback: Try TweetNaCl box open if it was box encrypted (unlikely for Registry challenge but good to have)
+        return null;
     }
 }
 
@@ -196,10 +238,12 @@ function verifyAuthorizationHeader(req) {
 
 module.exports = {
     generateKeyPair,
+    generateEncryptionKeyPair,
     createDigest,
     createSigningString,
     sign,
     verify,
+    decryptChallenge,
     createAuthorizationHeader,
     parseAuthorizationHeader,
     verifyAuthorizationHeader,

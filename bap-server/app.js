@@ -33,12 +33,17 @@ const onCancelRoutes = require('./routes/on_cancel');
 const store = require('./store');
 
 const app = express();
-const PORT = process.env.BAP_PORT || 3000;
+const PORT = process.env.PORT || process.env.BAP_PORT || 3000;
 
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 app.use(morgan('dev'));
+
+// Root route (for Railway health checks)
+app.get('/', (req, res) => {
+    res.send('ONDC BAP Server Running');
+});
 
 // Health check
 app.get('/health', (req, res) => {
@@ -87,7 +92,7 @@ app.use((err, req, res, _next) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     const mode = process.env.DEV_MODE === 'true' ? 'DEV (mock network)' : 'PRODUCTION (ONDC network)';
     console.log('');
     console.log('╔══════════════════════════════════════════════╗');
